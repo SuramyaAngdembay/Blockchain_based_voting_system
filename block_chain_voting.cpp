@@ -1,3 +1,12 @@
+/*
+
+The blockchain used in the code below stores each votes
+as a block in the blockchain, containing a hash of the previous block.
+Once a vote (block) is added, it cannot be altered without altering all the
+subsequent blocks, making it difficult to tamper with individual votes.
+
+*/
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
