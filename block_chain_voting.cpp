@@ -17,6 +17,7 @@ public:
     string name;
 
     // Default constructor
+    // We need to make a constructor for voter class because unordered map library expects constructor
     Voter() : voterID(""), name("") {}
 
     // Parameterized constructor
