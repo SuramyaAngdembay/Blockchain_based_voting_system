@@ -1,6 +1,6 @@
 /*
 
-The blockchain used in the code below stores each votes
+The blockchain used in the code below stores each vote
 as a block in the blockchain, containing a hash of the previous block.
 Once a vote (block) is added, it cannot be altered without altering all the
 subsequent blocks, making it difficult to tamper with individual votes.
@@ -26,10 +26,10 @@ public:
     string name;
 
     // Default constructor
-    // We need to make a constructor for voter class because unordered map library expects constructor
+    // Needed to support unordered_map for storing Voter objects
     Voter() : voterID(""), name("") {}
 
-    // Parameterized constructor
+    // Parameterized constructor for registering new voters
     Voter(const string& id, const string& name) : voterID(id), name(name) {}
 };
 
@@ -40,19 +40,19 @@ private:
     unordered_map<string, bool> hasVoted;  // Tracks if a voter has already voted
 
 public:
-    // Register a new voter
+    // Register a new voter (Requirement: Data creation for VoterRegistry)
     bool registerVoter(const string& id, const string& name) {
         if (voterMap.find(id) != voterMap.end()) {
             cout << "Voter ID already registered." << endl;
             return false;
         }
-        voterMap[id] = Voter(id, name);
+        voterMap[id] = Voter(id, name);  // Create a new voter
         hasVoted[id] = false;
         cout << "Voter registered: " << name << " (ID: " << id << ")" << endl;
         return true;
     }
 
-    // Verify if a voter is registered and hasn't voted yet
+    // Verify if a voter is registered and hasn't voted yet (Requirement: Data reading for VoterRegistry)
     bool verifyVoter(const string& id) {
         if (voterMap.find(id) == voterMap.end()) {
             cout << "Voter ID not found." << endl;
@@ -73,7 +73,7 @@ public:
     }
 };
 
-// This is the node class in our node based data-structure
+// Block class represents each node in the blockchain (Requirement: Node-based structure)
 class Block {
 public:
     string data;
@@ -81,10 +81,12 @@ public:
     string hash;
     Block* next;
 
+    // Constructor to initialize each block with data and hash of the previous block
     Block(const string& data, const string& prevHash) : data(data), prevHash(prevHash), next(nullptr) {
         calculateHash();
     }
 
+    // Calculate the hash for the block to ensure immutability
     void calculateHash() {
         stringstream concat;
         concat << prevHash << data;
@@ -94,18 +96,20 @@ public:
 
 class Blockchain {
 private:
-    Block* head;
+    Block* head; // Head of the blockchain
 
 public:
     Blockchain() : head(nullptr) {}
 
+    // Adds the genesis block to the blockchain (Requirement: Data creation operation)
     void addGenesisBlock() {
         if (head == nullptr) {
-            head = new Block("0", "0");
+            head = new Block("0", "0");  // Genesis block with arbitrary data
             saveToFile(head->hash);
         }
     }
 
+    // Adds a new block (vote) to the blockchain (Requirement: Data creation operation for Blockchain)
     void addBlock(const string& data) {
         if (head != nullptr) {
             Block* last = head;
@@ -118,6 +122,7 @@ public:
         }
     }
 
+    // Retrieves the hash of the last block (Requirement: Data reading operation for Blockchain)
     string getLastHash() const {
         if (head == nullptr) {
             return "f1534392279bddbf9d43dde8701cb5be14b82f76ec6607bf8d6ad557f60f304e";
@@ -130,6 +135,7 @@ public:
         }
     }
 
+    // Verifies blockchain integrity by comparing the last block's hash 
     bool verify() const {
         string lastHash = getLastHash();
         string fileHash;
@@ -142,6 +148,7 @@ public:
         return false;
     }
 
+    // Prints the blockchain to demonstrate reading all blocks 
     void print() const {
         Block* current = head;
         while (current != nullptr) {
@@ -151,6 +158,7 @@ public:
         cout << "END" << endl;
     }
 
+    // Tallies votes and displays the winner (demonstrates blockchain traversal and additional functionality)
     void checkWinner() const {
         int count1 = 0, count2 = 0, count3 = 0;
         Block* current = head;
@@ -180,6 +188,7 @@ public:
         }
     }
 
+    // Save the hash of the latest block to a file for verification 
     void saveToFile(const string& hash) const {
         ofstream hashFile("lasthash.txt");
         if (hashFile.is_open()) {
@@ -190,6 +199,10 @@ public:
         }
     }
 
+    // Note: The Remove Next operation is not implemented to maintain blockchain immutability, 
+    // as removing blocks would compromise the security and integrity of the blockchain structure.
+
+    // Destructor to clean up dynamically allocated blocks
     ~Blockchain() {
         Block* current = head;
         while (current != nullptr) {
@@ -200,6 +213,7 @@ public:
     }
 };
 
+// Main function as a test bench for demonstrating CRUD operations on the blockchain
 int main() {
     Blockchain blockchain;
     VoterRegistry voterRegistry;
@@ -246,6 +260,7 @@ int main() {
         cin.ignore();
     }
 
+    // Display the order of votes for demonstration 
     cout << "THE ORDER OF THE VOTES IS: ";
     blockchain.print();
 
