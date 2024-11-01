@@ -59,6 +59,7 @@ public:
     }
 };
 
+// This is the node class in our node based data-structure
 class Block {
 public:
     string data;
