@@ -16,6 +16,10 @@ public:
     string voterID;
     string name;
 
+    // Default constructor
+    Voter() : voterID(""), name("") {}
+
+    // Parameterized constructor
     Voter(const string& id, const string& name) : voterID(id), name(name) {}
 };
 
