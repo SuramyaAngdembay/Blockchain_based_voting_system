@@ -26,7 +26,6 @@ public:
     string name;
 
     // Default constructor
-    // Needed to support unordered_map for storing Voter objects
     Voter() : voterID(""), name("") {}
 
     // Parameterized constructor for registering new voters
@@ -40,19 +39,32 @@ private:
     unordered_map<string, bool> hasVoted;  // Tracks if a voter has already voted
 
 public:
-    // Register a new voter (Requirement: Data creation for VoterRegistry)
-    bool registerVoter(const string& id, const string& name) {
-        if (voterMap.find(id) != voterMap.end()) {
-            cout << "Voter ID already registered." << endl;
-            return false;
+    // Load voter registry from a specified CSV file
+    void loadVoterRegistry(const string& filePath) {
+        ifstream file(filePath);
+        if (!file.is_open()) {
+            cerr << "Error: Could not open voter registry file: " << filePath << endl;
+            exit(1);  // Exit the program if the file cannot be opened
         }
-        voterMap[id] = Voter(id, name);  // Create a new voter
-        hasVoted[id] = false;
-        cout << "Voter registered: " << name << " (ID: " << id << ")" << endl;
-        return true;
+
+        string line, header;
+        getline(file, header); // Skip the header line
+        while (getline(file, line)) {
+            stringstream ss(line);
+            string voterID, firstName, lastName;
+            getline(ss, voterID, ',');
+            getline(ss, firstName, ',');
+            getline(ss, lastName, ',');
+
+            string fullName = firstName + " " + lastName;
+            voterMap[voterID] = Voter(voterID, fullName);
+            hasVoted[voterID] = false; // Initialize as not voted
+        }
+        file.close();
+        cout << "Voter registry loaded successfully from " << filePath << endl;
     }
 
-    // Verify if a voter is registered and hasn't voted yet (Requirement: Data reading for VoterRegistry)
+    // Verify if a voter is registered and hasn't voted yet
     bool verifyVoter(const string& id) {
         if (voterMap.find(id) == voterMap.end()) {
             cout << "Voter ID not found." << endl;
@@ -73,7 +85,7 @@ public:
     }
 };
 
-// Block class represents each node in the blockchain (Requirement: Node-based structure)
+// Block class represents each node in the blockchain
 class Block {
 public:
     string data;
@@ -101,7 +113,7 @@ private:
 public:
     Blockchain() : head(nullptr) {}
 
-    // Adds the genesis block to the blockchain (Requirement: Data creation operation)
+    // Adds the genesis block to the blockchain
     void addGenesisBlock() {
         if (head == nullptr) {
             head = new Block("0", "0");  // Genesis block with arbitrary data
@@ -109,7 +121,7 @@ public:
         }
     }
 
-    // Adds a new block (vote) to the blockchain (Requirement: Data creation operation for Blockchain)
+    // Adds a new block (vote) to the blockchain
     void addBlock(const string& data) {
         if (head != nullptr) {
             Block* last = head;
@@ -122,7 +134,7 @@ public:
         }
     }
 
-    // Retrieves the hash of the last block (Requirement: Data reading operation for Blockchain)
+    // Retrieves the hash of the last block
     string getLastHash() const {
         if (head == nullptr) {
             return "f1534392279bddbf9d43dde8701cb5be14b82f76ec6607bf8d6ad557f60f304e";
@@ -158,7 +170,7 @@ public:
         cout << "END" << endl;
     }
 
-    // Tallies votes and displays the winner (demonstrates blockchain traversal and additional functionality)
+    // Tallies votes and displays the winner
     void checkWinner() const {
         int count1 = 0, count2 = 0, count3 = 0;
         Block* current = head;
@@ -199,9 +211,6 @@ public:
         }
     }
 
-    // Note: The Remove Next operation is not implemented to maintain blockchain immutability, 
-    // as removing blocks would compromise the security and integrity of the blockchain structure.
-
     // Destructor to clean up dynamically allocated blocks
     ~Blockchain() {
         Block* current = head;
@@ -213,16 +222,15 @@ public:
     }
 };
 
-// Main function as a test bench for demonstrating CRUD operations on the blockchain
+// Main function
 int main() {
     Blockchain blockchain;
     VoterRegistry voterRegistry;
-    blockchain.addGenesisBlock();
 
-    // Register voters
-    voterRegistry.registerVoter("1001", "Alice");
-    voterRegistry.registerVoter("1002", "Bob");
-    voterRegistry.registerVoter("1003", "Charlie");
+    // Load the voter registry from the CSV file
+    voterRegistry.loadVoterRegistry("voter_registry.csv");
+
+    blockchain.addGenesisBlock();
 
     int exit = 5;
     while (exit != 0) {
@@ -247,7 +255,7 @@ int main() {
         cout << "  3. ABHISHEK TOMAR\n";
         cout << "  4. Any other number to choose NOTA\n";
         cout << "-> ";
-        
+
         string input;
         getline(cin, input);
         blockchain.addBlock(input);
